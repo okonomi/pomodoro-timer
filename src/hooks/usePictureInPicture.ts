@@ -63,7 +63,7 @@ export function usePictureInPicture({
 
         // Load all stylesheets from the main document to ensure Tailwind CSS works
         const stylesheets = Array.from(document.styleSheets)
-        stylesheets.forEach((stylesheet) => {
+        for (const stylesheet of stylesheets) {
           try {
             // Only process stylesheets from the same origin (skip external stylesheets)
             if (stylesheet.href && !stylesheet.href.startsWith("data:")) {
@@ -74,18 +74,18 @@ export function usePictureInPicture({
             } else if (stylesheet.cssRules && stylesheet.cssRules.length > 0) {
               // For inline styles (like those injected by Vite in dev mode)
               const style = pipWindow.document.createElement("style")
-              Array.from(stylesheet.cssRules).forEach((rule) => {
+              for (const rule of Array.from(stylesheet.cssRules)) {
                 style.appendChild(
                   pipWindow.document.createTextNode(rule.cssText)
                 )
-              })
+              }
               pipWindow.document.head.appendChild(style)
             }
           } catch (e) {
             // CORS restrictions may prevent reading cssRules from some stylesheets
             console.warn("Could not copy stylesheet to PiP window:", e)
           }
-        })
+        }
 
         // Activate the PiP window
         setIsPiPActive(true)
