@@ -19,7 +19,7 @@ export function PiPWindow({
     <div className="flex h-screen w-full bg-slate-900 text-white">
       {/* 左側2/3 - タイマー表示のみ */}
       <div className="flex flex-grow items-center justify-center">
-        <p className="text-5xl font-bold font-mono">{formatTime(timeLeft)}</p>
+        <p className="font-mono text-5xl font-bold">{formatTime(timeLeft)}</p>
       </div>
 
       {/* 右側1/3 - ステータス表示とボタン */}
@@ -30,17 +30,17 @@ export function PiPWindow({
         </p>
 
         {/* ボタン - 横に並べる */}
-        <div className="flex flex-row gap-1 mt-1">
+        <div className="mt-1 flex flex-row gap-1">
           <button
             type="button"
-            className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-500 bg-opacity-80 border-none cursor-pointer hover:bg-opacity-100 transition-opacity"
+            className="bg-opacity-80 hover:bg-opacity-100 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full border-none bg-blue-500 transition-opacity"
             onClick={onToggleTimer}
           >
             {timerState === "running" ? "⏸" : "▶"}
           </button>
           <button
             type="button"
-            className="flex items-center justify-center w-6 h-6 rounded-full bg-slate-500 bg-opacity-80 border-none cursor-pointer hover:bg-opacity-100 transition-opacity text-[8px] font-bold"
+            className="bg-opacity-80 hover:bg-opacity-100 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full border-none bg-slate-500 text-[8px] font-bold transition-opacity"
             onClick={onSwitchTimerType}
           >
             SW
