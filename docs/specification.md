@@ -27,7 +27,7 @@ Webベースのプロダクティビティツールとして、ポモドーロ�
 - パッケージマネージャはpnpmを使用
 - スタイリングにTailwind CSS (v4) を使用
 - Canvas APIを用いてタイマーの表示を描画
-- WebブラウザのPicture-in-Picture APIを利用してCanvasの表示をPiPで表示
+- WebブラウザのDocument Picture-in-Picture APIを利用してCanvasの表示をPiPで表示
 
 ### デザイン
 - シンプルで集中を妨げないダークモード基調

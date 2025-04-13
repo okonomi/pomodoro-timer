@@ -7,6 +7,15 @@ type TimerType = 'work' | 'break';
 // タイマーの状態を定義する型
 type TimerState = 'running' | 'paused';
 
+// DocumentPictureInPictureWindowがTypeScriptで認識されるよう拡張定義
+declare global {
+  interface Window {
+    documentPictureInPicture?: {
+      requestWindow: (options?: { width?: number; height?: number }) => Promise<Window>;
+    };
+  }
+}
+
 function App() {
   // タイマーの種類と状態の管理
   const [timerType, setTimerType] = useState<TimerType>('work');
@@ -21,7 +30,8 @@ function App() {
   
   // Canvas要素の参照
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const pipWindowRef = useRef<Window | null>(null);
+  const pipCanvasRef = useRef<HTMLCanvasElement | null>(null);
   
   // PiP状態の管理
   const [isPiPActive, setIsPiPActive] = useState(false);
@@ -61,23 +71,26 @@ function App() {
   }, [timerState, timerType]);
 
   // Canvas描画処理
-  useEffect(() => {
-    const canvas = canvasRef.current;
+  const drawTimerCanvas = (canvas: HTMLCanvasElement, width: number, height: number, showControls: boolean = false) => {
     if (!canvas) return;
     
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
+
+    // キャンバスのサイズを設定
+    canvas.width = width;
+    canvas.height = height;
     
     // キャンバスをクリア
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, width, height);
     
     // 背景を描画
     ctx.fillStyle = '#1e293b'; // Tailwindのslate-800相当
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillRect(0, 0, width, height);
     
     // 円形プログレスバーの描画
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
+    const centerX = width / 2;
+    const centerY = height / 2;
     const radius = Math.min(centerX, centerY) - 20;
     
     // 残り時間の割合を計算
@@ -118,121 +131,188 @@ function App() {
     ctx.font = '20px sans-serif';
     ctx.fillText(timerType === 'work' ? '作業中' : '休憩中', centerX, centerY + 25);
     
-    // PiPモード用に動画に描画内容をコピー
-    const video = videoRef.current;
-    if (video && isPiPActive) {
-      const stream = canvas.captureStream();
-      if (video.srcObject !== stream) {
-        video.srcObject = stream;
-        // ビデオの再生を確実に開始
-        video.play().catch(err => console.error('ビデオ再生エラー:', err));
-      }
-    }
-  }, [timeLeft, timerType, isPiPActive]);
-
-  // Canvas の描画更新を高頻度で行い、滑らかなアニメーションを実現
-  useEffect(() => {
-    let animationFrameId: number;
-    
-    if (isPiPActive) {
-      const updateCanvas = () => {
-        const canvas = canvasRef.current;
-        if (canvas) {
-          // 毎フレーム強制的に再描画をトリガー
-          const ctx = canvas.getContext('2d');
-          if (ctx) {
-            // 既存のキャンバス描画内容を保持しつつ微小変更を加えて再描画をトリガー
-            const pixel = ctx.getImageData(0, 0, 1, 1);
-            ctx.putImageData(pixel, 0, 0);
-          }
-        }
-        animationFrameId = requestAnimationFrame(updateCanvas);
-      };
+    // コントロールボタンの描画（PiPモードのみ）
+    if (showControls) {
+      // 開始/一時停止ボタン
+      const playBtnY = height - 40;
+      const playBtnX = width / 2;
+      const playBtnRadius = 25;
       
-      animationFrameId = requestAnimationFrame(updateCanvas);
+      ctx.beginPath();
+      ctx.arc(playBtnX, playBtnY, playBtnRadius, 0, Math.PI * 2);
+      ctx.fillStyle = '#3b82f680'; // 半透明の青色
+      ctx.fill();
+      
+      // 再生/一時停止アイコン
+      ctx.fillStyle = '#ffffff';
+      if (timerState === 'running') {
+        // 一時停止アイコン
+        ctx.fillRect(playBtnX - 10, playBtnY - 15, 7, 30);
+        ctx.fillRect(playBtnX + 3, playBtnY - 15, 7, 30);
+      } else {
+        // 再生アイコン
+        ctx.beginPath();
+        ctx.moveTo(playBtnX - 10, playBtnY - 15);
+        ctx.lineTo(playBtnX - 10, playBtnY + 15);
+        ctx.lineTo(playBtnX + 15, playBtnY);
+        ctx.closePath();
+        ctx.fill();
+      }
+      
+      // タイマータイプ切替ボタン
+      const switchBtnY = playBtnY;
+      const switchBtnX = width - 40;
+      const switchBtnRadius = 20;
+      
+      ctx.beginPath();
+      ctx.arc(switchBtnX, switchBtnY, switchBtnRadius, 0, Math.PI * 2);
+      ctx.fillStyle = '#64748b80'; // 半透明のスレート色
+      ctx.fill();
+      
+      // 切替アイコン
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 14px sans-serif';
+      ctx.fillText('切替', switchBtnX, switchBtnY);
     }
+  };
+  
+  // メインキャンバスの描画
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
     
-    return () => {
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
+    drawTimerCanvas(canvas, canvas.width, canvas.height, false);
+    
+    // PiP用キャンバスの更新
+    if (isPiPActive && pipCanvasRef.current) {
+      drawTimerCanvas(
+        pipCanvasRef.current, 
+        pipCanvasRef.current.width, 
+        pipCanvasRef.current.height, 
+        true
+      );
+    }
+  }, [timeLeft, timerType, isPiPActive, timerState]);
+
+  // PiPウィンドウのクリックイベント処理
+  useEffect(() => {
+    if (!isPiPActive || !pipWindowRef.current || !pipCanvasRef.current) return;
+    
+    const pipWindow = pipWindowRef.current;
+    const pipCanvas = pipCanvasRef.current;
+    
+    // クリックイベントハンドラ
+    const handlePipClick = (e: MouseEvent) => {
+      const rect = pipCanvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      // 再生/一時停止ボタンの位置
+      const playBtnY = pipCanvas.height - 40;
+      const playBtnX = pipCanvas.width / 2;
+      const playBtnRadius = 25;
+      
+      // タイマータイプ切替ボタンの位置
+      const switchBtnY = playBtnY;
+      const switchBtnX = pipCanvas.width - 40;
+      const switchBtnRadius = 20;
+      
+      // 再生/一時停止ボタンがクリックされたか
+      const distanceToPlayBtn = Math.sqrt(
+        Math.pow(x - playBtnX, 2) + Math.pow(y - playBtnY, 2)
+      );
+      
+      // タイマー切替ボタンがクリックされたか
+      const distanceToSwitchBtn = Math.sqrt(
+        Math.pow(x - switchBtnX, 2) + Math.pow(y - switchBtnY, 2)
+      );
+      
+      if (distanceToPlayBtn <= playBtnRadius) {
+        toggleTimer();
+      } else if (distanceToSwitchBtn <= switchBtnRadius) {
+        switchTimerType();
       }
     };
-  }, [isPiPActive]);
+    
+    pipCanvas.addEventListener('click', handlePipClick);
+    
+    return () => {
+      pipCanvas.removeEventListener('click', handlePipClick);
+    };
+  }, [isPiPActive, timerState, timerType]);
 
-  // video要素のソース設定とPiP表示を別々に管理
+  // PiPウィンドウが閉じられたときのイベント処理
   useEffect(() => {
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
+    if (!pipWindowRef.current) return;
     
-    if (!video || !canvas) return;
+    const handlePipClose = () => {
+      setIsPiPActive(false);
+      pipWindowRef.current = null;
+      pipCanvasRef.current = null;
+    };
     
-    // PiP表示用のビデオストリームを設定
-    if (isPiPActive) {
-      const stream = canvas.captureStream(30); // フレームレート指定
-      video.srcObject = stream;
+    if (isPiPActive && pipWindowRef.current) {
+      pipWindowRef.current.addEventListener('pagehide', handlePipClose);
       
-      // ビデオ要素の再生を開始
-      video.play().catch(err => {
-        console.error('ビデオの再生に失敗しました:', err);
-        setIsPiPActive(false);
-      });
-    } else {
-      // PiP非アクティブ時はストリームを停止
-      if (video.srcObject) {
-        const tracks = (video.srcObject as MediaStream).getTracks();
-        tracks.forEach(track => track.stop());
-        video.srcObject = null;
-      }
+      return () => {
+        if (pipWindowRef.current) {
+          pipWindowRef.current.removeEventListener('pagehide', handlePipClose);
+        }
+      };
     }
   }, [isPiPActive]);
 
-  // Picture-in-Picture機能の切り替え
+  // Document Picture-in-Picture機能の切り替え
   const togglePiP = async () => {
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    
-    if (!video || !canvas) return;
-    
     try {
-      if (document.pictureInPictureElement) {
+      // Document PiP APIのサポート確認
+      if (!window.documentPictureInPicture) {
+        throw new Error('このブラウザはDocument Picture-in-Picture APIをサポートしていません');
+      }
+      
+      if (isPiPActive && pipWindowRef.current) {
         // PiPモードを終了
-        await document.exitPictureInPicture();
+        pipWindowRef.current.close();
+        pipWindowRef.current = null;
+        pipCanvasRef.current = null;
         setIsPiPActive(false);
       } else {
-        // PiPモードを開始
-        // ストリームが設定されていない場合は設定
-        const stream = canvas.captureStream(30);
-        video.srcObject = stream;
+        // PiPウィンドウのサイズ
+        const pipWidth = 320;
+        const pipHeight = 320;
         
-        // 再生開始が必要（PiP APIは再生中のビデオのみ対応）
-        await video.play();
+        // PiPウィンドウの作成
+        const pipWindow = await window.documentPictureInPicture.requestWindow({
+          width: pipWidth,
+          height: pipHeight
+        });
+        pipWindowRef.current = pipWindow;
         
-        // PiPモードをリクエスト
-        await video.requestPictureInPicture();
+        // PiPウィンドウのスタイルとコンテンツを設定
+        pipWindow.document.body.style.margin = '0';
+        pipWindow.document.body.style.padding = '0';
+        pipWindow.document.body.style.overflow = 'hidden';
+        pipWindow.document.title = 'ポモドーロタイマー';
+        
+        // PiP用のキャンバスを作成
+        const pipCanvas = pipWindow.document.createElement('canvas');
+        pipCanvas.width = pipWidth;
+        pipCanvas.height = pipHeight;
+        pipCanvas.style.display = 'block';
+        pipWindow.document.body.appendChild(pipCanvas);
+        pipCanvasRef.current = pipCanvas;
+        
+        // PiPキャンバスにタイマーを描画
+        drawTimerCanvas(pipCanvas, pipWidth, pipHeight, true);
+        
         setIsPiPActive(true);
       }
     } catch (err) {
       console.error('PiPの切り替えに失敗しました:', err);
-      alert('ピクチャーインピクチャーの表示に失敗しました。ブラウザがこの機能をサポートしていない可能性があります。');
+      alert('ピクチャーインピクチャーの表示に失敗しました。ブラウザがDocument Picture-in-Picture APIをサポートしていない可能性があります。');
       setIsPiPActive(false);
     }
   };
-
-  // PiPモードが終了した時のイベント処理
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    const handlePiPExit = () => {
-      setIsPiPActive(false);
-    };
-
-    video.addEventListener('leavepictureinpicture', handlePiPExit);
-    
-    return () => {
-      video.removeEventListener('leavepictureinpicture', handlePiPExit);
-    };
-  }, []);
 
   return (
     <div className="min-h-screen bg-slate-900 text-white flex flex-col items-center justify-center p-4">
@@ -244,13 +324,6 @@ function App() {
           width={300} 
           height={300} 
           className="rounded-full shadow-lg"
-        />
-        <video 
-          ref={videoRef} 
-          className="hidden" 
-          muted 
-          playsInline 
-          autoPlay
         />
       </div>
       
@@ -280,6 +353,7 @@ function App() {
       <div className="text-slate-400 text-center">
         <p>作業: 50分 / 休憩: 10分</p>
         <p>現在: {timerType === 'work' ? '作業中' : '休憩中'}</p>
+        {isPiPActive && <p className="mt-2">PiP内でのタイマー操作: ウィンドウ下部のボタンをクリック</p>}
       </div>
     </div>
   )
