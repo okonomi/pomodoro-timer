@@ -1,9 +1,9 @@
-import { createPortal } from 'react-dom';
+import { createPortal } from "react-dom"
 
-import { useTimer } from './hooks/useTimer';
-import { usePictureInPicture } from './hooks/usePictureInPicture';
-import { PiPWindow } from './components/PiPWindow';
-import { TimerDisplay } from './components/TimerDisplay';
+import { PiPWindow } from "./components/PiPWindow"
+import { TimerDisplay } from "./components/TimerDisplay"
+import { usePictureInPicture } from "./hooks/usePictureInPicture"
+import { useTimer } from "./hooks/useTimer"
 
 function App() {
   // タイマーのカスタムフック
@@ -15,23 +15,19 @@ function App() {
     switchTimerType,
     formatTime,
   } = useTimer({
-    workDuration: 50 * 60,  // 50分
+    workDuration: 50 * 60, // 50分
     breakDuration: 10 * 60, // 10分
-  });
+  })
 
   // PiPのカスタムフック
-  const {
-    isPiPActive,
-    pipWindowRef,
-    togglePiP,
-  } = usePictureInPicture({
+  const { isPiPActive, pipWindowRef, togglePiP } = usePictureInPicture({
     width: 320,
     height: 100, // 高さを100pxに変更
-  });
+  })
 
   return (
     <>
-      <TimerDisplay 
+      <TimerDisplay
         timeLeft={timeLeft}
         timerType={timerType}
         timerState={timerState}
@@ -43,18 +39,20 @@ function App() {
       />
 
       {/* PiPウィンドウがアクティブな場合、Reactコンポーネントをポータルとしてレンダリング */}
-      {isPiPActive && pipWindowRef.current && createPortal(
-        <PiPWindow
-          timeLeft={timeLeft}
-          timerType={timerType}
-          timerState={timerState}
-          onToggleTimer={toggleTimer}
-          onSwitchTimerType={switchTimerType}
-        />,
-        pipWindowRef.current.document.body
-      )}
+      {isPiPActive &&
+        pipWindowRef.current &&
+        createPortal(
+          <PiPWindow
+            timeLeft={timeLeft}
+            timerType={timerType}
+            timerState={timerState}
+            onToggleTimer={toggleTimer}
+            onSwitchTimerType={switchTimerType}
+          />,
+          pipWindowRef.current.document.body
+        )}
     </>
-  );
+  )
 }
 
-export default App;
+export default App

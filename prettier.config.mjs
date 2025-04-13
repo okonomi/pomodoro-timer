@@ -5,6 +5,6 @@ const config = {
   trailingComma: "es5",
   plugins: ["prettier-plugin-tailwindcss"],
   tailwindFunctions: ["clsx"],
-};
+}
 
-export default config;
+export default config
