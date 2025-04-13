@@ -185,15 +185,23 @@ function App() {
         `;
         
         // ボタンのイベントハンドラを設定
+        // 関数をコピーして内部に新しい関数を作成し、クロージャの問題を回避
         const playButton = doc.getElementById('pip-play-button');
-        const switchButton = doc.getElementById('pip-switch-button');
-        
         if (playButton) {
-          playButton.addEventListener('click', toggleTimer);
+          playButton.addEventListener('click', () => {
+            // 直接stateを変更する関数を呼び出す
+            setTimerState(prevState => prevState === 'running' ? 'paused' : 'running');
+          });
         }
         
+        const switchButton = doc.getElementById('pip-switch-button');
         if (switchButton) {
-          switchButton.addEventListener('click', switchTimerType);
+          switchButton.addEventListener('click', () => {
+            // 直接stateを変更する関数を呼び出す
+            const newType = timerType === 'work' ? 'break' : 'work';
+            setTimerType(newType);
+            setTimeLeft(newType === 'work' ? workDuration : breakDuration);
+          });
         }
         
         // PiPのタイトルを設定
