@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import type { TimerState, TimerType } from "../types"
 
 interface UseTimerProps {
@@ -33,11 +33,11 @@ export function useTimer({
   }
 
   // タイマー種類を切り替える関数
-  const switchTimerType = () => {
+  const switchTimerType = useCallback(() => {
     const newType = timerType === "work" ? "break" : "work"
     setTimerType(newType)
     setTimeLeft(newType === "work" ? workDuration : breakDuration)
-  }
+  }, [timerType, workDuration, breakDuration])
 
   // タイマーのカウントダウン処理
   useEffect(() => {
@@ -55,7 +55,7 @@ export function useTimer({
     }, 1000)
 
     return () => clearInterval(interval)
-  }, [timerState, timerType, workDuration, breakDuration])
+  }, [timerState, timerType, switchTimerType, workDuration, breakDuration])
 
   // 残り時間をフォーマットする関数
   const formatTime = (seconds: number): string => {
