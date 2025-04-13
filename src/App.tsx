@@ -88,48 +88,21 @@ function App() {
     ctx.fillStyle = '#1e293b'; // Tailwindのslate-800相当
     ctx.fillRect(0, 0, width, height);
     
-    // 円形プログレスバーの描画
-    const centerX = width / 2;
-    const centerY = height / 2;
-    const radius = Math.min(centerX, centerY) - 20;
-    
-    // 残り時間の割合を計算
-    const totalTime = timerType === 'work' ? workDuration : breakDuration;
-    const progress = timeLeft / totalTime;
-    
-    // 背景の円を描画
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-    ctx.strokeStyle = '#475569'; // Tailwindのslate-600相当
-    ctx.lineWidth = 15;
-    ctx.stroke();
-    
-    // 進行状況の円を描画
-    ctx.beginPath();
-    ctx.arc(
-      centerX,
-      centerY,
-      radius,
-      -Math.PI / 2,
-      -Math.PI / 2 + (Math.PI * 2 * (1 - progress))
-    );
-    ctx.strokeStyle = timerType === 'work' ? '#3b82f6' : '#22c55e'; // work: blue-500, break: green-500
-    ctx.stroke();
-    
     // 残り時間のテキスト表示
     const minutes = Math.floor(timeLeft / 60);
     const seconds = timeLeft % 60;
     const timeText = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     
-    ctx.font = 'bold 40px sans-serif';
+    // タイマー表示を画面中央に大きく表示
+    ctx.font = 'bold 60px sans-serif';
     ctx.fillStyle = '#ffffff';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(timeText, centerX, centerY - 15);
+    ctx.fillText(timeText, width / 2, height / 2 - 20);
     
     // ステータステキスト
-    ctx.font = '20px sans-serif';
-    ctx.fillText(timerType === 'work' ? '作業中' : '休憩中', centerX, centerY + 25);
+    ctx.font = '24px sans-serif';
+    ctx.fillText(timerType === 'work' ? '作業中' : '休憩中', width / 2, height / 2 + 30);
     
     // コントロールボタンの描画（PiPモードのみ）
     if (showControls) {
@@ -322,8 +295,8 @@ function App() {
         <canvas 
           ref={canvasRef} 
           width={300} 
-          height={300} 
-          className="rounded-full shadow-lg"
+          height={200} 
+          className="rounded-lg shadow-lg"
         />
       </div>
       
