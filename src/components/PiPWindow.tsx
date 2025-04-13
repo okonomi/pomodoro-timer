@@ -32,12 +32,14 @@ export function PiPWindow({
         {/* ボタン - 横に並べる */}
         <div className="flex flex-row gap-1 mt-1">
           <button
+            type="button"
             className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-500 bg-opacity-80 border-none cursor-pointer hover:bg-opacity-100 transition-opacity"
             onClick={onToggleTimer}
           >
             {timerState === "running" ? "⏸" : "▶"}
           </button>
           <button
+            type="button"
             className="flex items-center justify-center w-6 h-6 rounded-full bg-slate-500 bg-opacity-80 border-none cursor-pointer hover:bg-opacity-100 transition-opacity text-[8px] font-bold"
             onClick={onSwitchTimerType}
           >

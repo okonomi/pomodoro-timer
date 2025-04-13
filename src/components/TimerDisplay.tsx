@@ -36,6 +36,7 @@ export function TimerDisplay({
 
       <div className="flex gap-4 mb-6">
         <button
+          type="button"
           onClick={onToggleTimer}
           className="px-6 py-3 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium transition"
         >
@@ -43,6 +44,7 @@ export function TimerDisplay({
         </button>
 
         <button
+          type="button"
           onClick={onTogglePiP}
           className="px-6 py-3 rounded-full bg-slate-700 hover:bg-slate-600 text-white font-medium transition"
         >
@@ -50,6 +52,7 @@ export function TimerDisplay({
         </button>
 
         <button
+          type="button"
           onClick={onSwitchTimerType}
           className="px-6 py-3 rounded-full bg-slate-700 hover:bg-slate-600 text-white font-medium transition"
         >
