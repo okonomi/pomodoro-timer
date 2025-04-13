@@ -124,33 +124,115 @@ function App() {
       const stream = canvas.captureStream();
       if (video.srcObject !== stream) {
         video.srcObject = stream;
+        // ビデオの再生を確実に開始
+        video.play().catch(err => console.error('ビデオ再生エラー:', err));
       }
     }
   }, [timeLeft, timerType, isPiPActive]);
 
+  // Canvas の描画更新を高頻度で行い、滑らかなアニメーションを実現
+  useEffect(() => {
+    let animationFrameId: number;
+    
+    if (isPiPActive) {
+      const updateCanvas = () => {
+        const canvas = canvasRef.current;
+        if (canvas) {
+          // 毎フレーム強制的に再描画をトリガー
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            // 既存のキャンバス描画内容を保持しつつ微小変更を加えて再描画をトリガー
+            const pixel = ctx.getImageData(0, 0, 1, 1);
+            ctx.putImageData(pixel, 0, 0);
+          }
+        }
+        animationFrameId = requestAnimationFrame(updateCanvas);
+      };
+      
+      animationFrameId = requestAnimationFrame(updateCanvas);
+    }
+    
+    return () => {
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+    };
+  }, [isPiPActive]);
+
+  // video要素のソース設定とPiP表示を別々に管理
+  useEffect(() => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    
+    if (!video || !canvas) return;
+    
+    // PiP表示用のビデオストリームを設定
+    if (isPiPActive) {
+      const stream = canvas.captureStream(30); // フレームレート指定
+      video.srcObject = stream;
+      
+      // ビデオ要素の再生を開始
+      video.play().catch(err => {
+        console.error('ビデオの再生に失敗しました:', err);
+        setIsPiPActive(false);
+      });
+    } else {
+      // PiP非アクティブ時はストリームを停止
+      if (video.srcObject) {
+        const tracks = (video.srcObject as MediaStream).getTracks();
+        tracks.forEach(track => track.stop());
+        video.srcObject = null;
+      }
+    }
+  }, [isPiPActive]);
+
   // Picture-in-Picture機能の切り替え
   const togglePiP = async () => {
     const video = videoRef.current;
-    if (!video) return;
+    const canvas = canvasRef.current;
+    
+    if (!video || !canvas) return;
     
     try {
       if (document.pictureInPictureElement) {
+        // PiPモードを終了
         await document.exitPictureInPicture();
         setIsPiPActive(false);
       } else {
-        if (video.srcObject === null) {
-          const canvas = canvasRef.current;
-          if (canvas) {
-            video.srcObject = canvas.captureStream();
-          }
-        }
+        // PiPモードを開始
+        // ストリームが設定されていない場合は設定
+        const stream = canvas.captureStream(30);
+        video.srcObject = stream;
+        
+        // 再生開始が必要（PiP APIは再生中のビデオのみ対応）
+        await video.play();
+        
+        // PiPモードをリクエスト
         await video.requestPictureInPicture();
         setIsPiPActive(true);
       }
     } catch (err) {
       console.error('PiPの切り替えに失敗しました:', err);
+      alert('ピクチャーインピクチャーの表示に失敗しました。ブラウザがこの機能をサポートしていない可能性があります。');
+      setIsPiPActive(false);
     }
   };
+
+  // PiPモードが終了した時のイベント処理
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const handlePiPExit = () => {
+      setIsPiPActive(false);
+    };
+
+    video.addEventListener('leavepictureinpicture', handlePiPExit);
+    
+    return () => {
+      video.removeEventListener('leavepictureinpicture', handlePiPExit);
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-slate-900 text-white flex flex-col items-center justify-center p-4">
@@ -163,7 +245,13 @@ function App() {
           height={300} 
           className="rounded-full shadow-lg"
         />
-        <video ref={videoRef} className="hidden" muted playsInline />
+        <video 
+          ref={videoRef} 
+          className="hidden" 
+          muted 
+          playsInline 
+          autoPlay
+        />
       </div>
       
       <div className="flex gap-4 mb-6">
