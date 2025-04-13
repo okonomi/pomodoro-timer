@@ -14,7 +14,7 @@ export function usePictureInPicture({
   const [isPiPActive, setIsPiPActive] = useState(false);
   const pipWindowRef = useRef<Window | null>(null);
 
-  // PiPウィンドウが閉じられたときのイベント処理
+  // Event handler for when the PiP window is closed
   useEffect(() => {
     if (!pipWindowRef.current) return;
     
@@ -35,37 +35,37 @@ export function usePictureInPicture({
     }
   }, [isPiPActive, onClose]);
 
-  // PiPウィンドウの開閉を制御する関数
+  // Function to control the opening and closing of the PiP window
   const togglePiP = async () => {
     try {
-      // Document PiP APIのサポート確認
+      // Check for Document PiP API support
       if (!window.documentPictureInPicture) {
-        throw new Error('このブラウザはDocument Picture-in-Picture APIをサポートしていません');
+        throw new Error('This browser does not support Document Picture-in-Picture API');
       }
       
       if (isPiPActive && pipWindowRef.current) {
-        // PiPモードを終了
+        // Exit PiP mode
         pipWindowRef.current.close();
         pipWindowRef.current = null;
         setIsPiPActive(false);
       } else {
-        // PiPウィンドウの作成
+        // Create the PiP window
         const pipWindow = await window.documentPictureInPicture.requestWindow({
           width,
           height
         });
         pipWindowRef.current = pipWindow;
         
-        // ページのタイトルを設定
-        pipWindow.document.title = 'ポモドーロタイマー';
+        // Set the page title
+        pipWindow.document.title = 'Pomodoro Timer';
         
-        // Tailwind CSSを読み込む
+        // Load Tailwind CSS
         const linkEl = pipWindow.document.createElement('link');
         linkEl.rel = 'stylesheet';
-        linkEl.href = window.location.origin + '/src/index.css'; // Tailwind CSSへのパス
+        linkEl.href = window.location.origin + '/src/index.css'; // Path to Tailwind CSS
         pipWindow.document.head.appendChild(linkEl);
         
-        // 最低限のスタイルを設定
+        // Set minimal styles
         const style = pipWindow.document.createElement('style');
         style.textContent = `
           body {
@@ -77,12 +77,12 @@ export function usePictureInPicture({
         `;
         pipWindow.document.head.appendChild(style);
         
-        // PiPウィンドウがアクティブに
+        // Activate the PiP window
         setIsPiPActive(true);
       }
     } catch (err) {
-      console.error('PiPの切り替えに失敗しました:', err);
-      alert('ピクチャーインピクチャーの表示に失敗しました。ブラウザがDocument Picture-in-Picture APIをサポートしていない可能性があります。');
+      console.error('Failed to toggle Picture-in-Picture:', err);
+      alert('Failed to display Picture-in-Picture. Your browser may not support the Document Picture-in-Picture API.');
       setIsPiPActive(false);
     }
   };

@@ -24,14 +24,14 @@ export function TimerDisplay({
 }: TimerDisplayProps) {
   return (
     <div className="min-h-screen bg-slate-900 text-white flex flex-col items-center justify-center p-4">
-      <h1 className="text-3xl font-bold mb-8">ポモドーロタイマー</h1>
+      <h1 className="text-3xl font-bold mb-8">Pomodoro Timer</h1>
       
       <div className="bg-slate-800 rounded-lg p-10 mb-8 shadow-lg w-80 text-center">
         <div className="text-7xl font-bold mb-3">
           {formatTime(timeLeft)}
         </div>
         <div className="text-2xl text-slate-300 mb-4">
-          {timerType === 'work' ? '作業中' : '休憩中'}
+          {timerType === 'work' ? 'Working' : 'Break'}
         </div>
       </div>
       
@@ -40,28 +40,28 @@ export function TimerDisplay({
           onClick={onToggleTimer}
           className="px-6 py-3 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium transition"
         >
-          {timerState === 'running' ? '一時停止' : '開始'}
+          {timerState === 'running' ? 'Pause' : 'Start'}
         </button>
         
         <button
           onClick={onTogglePiP}
           className="px-6 py-3 rounded-full bg-slate-700 hover:bg-slate-600 text-white font-medium transition"
         >
-          {isPiPActive ? 'PiP解除' : 'PiP表示'}
+          {isPiPActive ? 'Close PiP' : 'Open PiP'}
         </button>
         
         <button
           onClick={onSwitchTimerType}
           className="px-6 py-3 rounded-full bg-slate-700 hover:bg-slate-600 text-white font-medium transition"
         >
-          {timerType === 'work' ? '休憩へ切替' : '作業へ切替'}
+          {timerType === 'work' ? 'Switch to Break' : 'Switch to Work'}
         </button>
       </div>
       
       <div className="text-slate-400 text-center">
-        <p>作業: 50分 / 休憩: 10分</p>
-        <p>現在: {timerType === 'work' ? '作業中' : '休憩中'}</p>
-        {isPiPActive && <p className="mt-2">PiP内でのタイマー操作: ウィンドウ内のボタンをクリック</p>}
+        <p>Work: 50 minutes / Break: 10 minutes</p>
+        <p>Current mode: {timerType === 'work' ? 'Working' : 'Break'}</p>
+        {isPiPActive && <p className="mt-2">Controls in PiP window: Click buttons inside PiP window</p>}
       </div>
     </div>
   );
