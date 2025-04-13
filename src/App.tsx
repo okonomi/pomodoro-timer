@@ -1,5 +1,4 @@
 import { createPortal } from 'react-dom';
-import './App.css';
 
 import { useTimer } from './hooks/useTimer';
 import { usePictureInPicture } from './hooks/usePictureInPicture';
