@@ -27,7 +27,7 @@ export function TimerDisplay({
       <h1 className="text-3xl font-bold mb-8">Pomodoro Timer</h1>
       
       <div className="bg-slate-800 rounded-lg p-10 mb-8 shadow-lg w-80 text-center">
-        <div className="text-7xl font-bold mb-3">
+        <div className="text-7xl font-bold font-mono mb-3">
           {formatTime(timeLeft)}
         </div>
         <div className="text-2xl text-slate-300 mb-4">
