@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import './App.css'
 
 // タイマーの種類を定義する型
@@ -14,6 +15,113 @@ declare global {
       requestWindow: (options?: { width?: number; height?: number }) => Promise<Window>;
     };
   }
+}
+
+// PiPウィンドウ用のProps型を定義
+interface PiPWindowProps {
+  timeLeft: number;
+  timerType: TimerType;
+  timerState: TimerState;
+  onToggleTimer: () => void;
+  onSwitchTimerType: () => void;
+}
+
+// PiPウィンドウコンポーネント
+function PiPWindow({ timeLeft, timerType, timerState, onToggleTimer, onSwitchTimerType }: PiPWindowProps) {
+  // 時間のフォーマット
+  const formatTime = (seconds: number): string => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+  };
+
+  return (
+    <>
+      {/* PiPウィンドウのスタイルを設定 */}
+      <style>
+        {`
+          body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #1e293b;
+            color: #ffffff;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+          }
+          .timer-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+          }
+          .time {
+            font-size: 60px;
+            font-weight: bold;
+            margin: 0;
+          }
+          .status {
+            font-size: 24px;
+            margin: 10px 0 20px;
+          }
+          .controls {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+          }
+          .button {
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+          }
+          .button:hover {
+            opacity: 1;
+          }
+          .button-play {
+            background-color: #3b82f6;
+          }
+          .button-switch {
+            background-color: #64748b;
+            font-size: 12px;
+            font-weight: bold;
+          }
+        `}
+      </style>
+      
+      {/* PiPウィンドウの内容 */}
+      <div className="timer-container">
+        <p className="time">{formatTime(timeLeft)}</p>
+        <p className="status">{timerType === 'work' ? '作業中' : '休憩中'}</p>
+        <div className="controls">
+          <button 
+            className="button button-play"
+            onClick={onToggleTimer}
+          >
+            {timerState === 'running' ? '⏸' : '▶'}
+          </button>
+          <button 
+            className="button button-switch"
+            onClick={onSwitchTimerType}
+          >
+            切替
+          </button>
+        </div>
+      </div>
+    </>
+  );
 }
 
 function App() {
@@ -101,112 +209,15 @@ function App() {
         });
         pipWindowRef.current = pipWindow;
         
-        // PiPウィンドウのスタイルとコンテンツを設定
-        const doc = pipWindow.document;
+        // ページのタイトルを設定
+        pipWindow.document.title = 'ポモドーロタイマー';
         
-        // スタイルの設定
-        const style = doc.createElement('style');
-        style.textContent = `
-          body {
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: #1e293b;
-            color: #ffffff;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-          }
-          .timer-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 20px;
-          }
-          .time {
-            font-size: 60px;
-            font-weight: bold;
-            margin: 0;
-          }
-          .status {
-            font-size: 24px;
-            margin: 10px 0 20px;
-          }
-          .controls {
-            display: flex;
-            gap: 20px;
-            margin-top: 20px;
-          }
-          .button {
-            border: none;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            opacity: 0.8;
-            transition: opacity 0.2s;
-          }
-          .button:hover {
-            opacity: 1;
-          }
-          .button-play {
-            background-color: #3b82f6;
-          }
-          .button-switch {
-            background-color: #64748b;
-            font-size: 12px;
-            font-weight: bold;
-          }
-        `;
-        doc.head.appendChild(style);
+        // デフォルトのマージンを削除
+        const bodyStyle = pipWindow.document.body.style;
+        bodyStyle.margin = '0';
+        bodyStyle.padding = '0';
         
-        // HTML要素の作成
-        doc.body.innerHTML = `
-          <div class="timer-container">
-            <p class="time">${formatTime(timeLeft)}</p>
-            <p class="status">${timerType === 'work' ? '作業中' : '休憩中'}</p>
-            <div class="controls">
-              <button id="pip-play-button" class="button button-play">
-                ${timerState === 'running' ? '⏸' : '▶'}
-              </button>
-              <button id="pip-switch-button" class="button button-switch">
-                切替
-              </button>
-            </div>
-          </div>
-        `;
-        
-        // ボタンのイベントハンドラを設定
-        // 関数をコピーして内部に新しい関数を作成し、クロージャの問題を回避
-        const playButton = doc.getElementById('pip-play-button');
-        if (playButton) {
-          playButton.addEventListener('click', () => {
-            // 直接stateを変更する関数を呼び出す
-            setTimerState(prevState => prevState === 'running' ? 'paused' : 'running');
-          });
-        }
-        
-        const switchButton = doc.getElementById('pip-switch-button');
-        if (switchButton) {
-          switchButton.addEventListener('click', () => {
-            // 直接stateを変更する関数を呼び出す
-            const newType = timerType === 'work' ? 'break' : 'work';
-            setTimerType(newType);
-            setTimeLeft(newType === 'work' ? workDuration : breakDuration);
-          });
-        }
-        
-        // PiPのタイトルを設定
-        doc.title = 'ポモドーロタイマー';
-        
+        // PiPウィンドウがアクティブに
         setIsPiPActive(true);
       }
     } catch (err) {
@@ -215,33 +226,6 @@ function App() {
       setIsPiPActive(false);
     }
   };
-
-  // PiPウィンドウの内容更新
-  useEffect(() => {
-    if (!isPiPActive || !pipWindowRef.current) return;
-    
-    const pipWindow = pipWindowRef.current;
-    const doc = pipWindow.document;
-    
-    // 時間表示の更新
-    const timeElement = doc.querySelector('.time');
-    if (timeElement) {
-      timeElement.textContent = formatTime(timeLeft);
-    }
-    
-    // 状態表示の更新
-    const statusElement = doc.querySelector('.status');
-    if (statusElement) {
-      statusElement.textContent = timerType === 'work' ? '作業中' : '休憩中';
-    }
-    
-    // 再生ボタンの更新
-    const playButton = doc.getElementById('pip-play-button');
-    if (playButton) {
-      playButton.textContent = timerState === 'running' ? '⏸' : '▶';
-    }
-    
-  }, [timeLeft, timerType, timerState, isPiPActive]);
 
   // PiPウィンドウが閉じられたときのイベント処理
   useEffect(() => {
@@ -307,6 +291,18 @@ function App() {
         <p>現在: {timerType === 'work' ? '作業中' : '休憩中'}</p>
         {isPiPActive && <p className="mt-2">PiP内でのタイマー操作: ウィンドウ内のボタンをクリック</p>}
       </div>
+
+      {/* PiPウィンドウがアクティブな場合、Reactコンポーネントをポータルとしてレンダリング */}
+      {isPiPActive && pipWindowRef.current && createPortal(
+        <PiPWindow
+          timeLeft={timeLeft}
+          timerType={timerType}
+          timerState={timerState}
+          onToggleTimer={toggleTimer}
+          onSwitchTimerType={switchTimerType}
+        />,
+        pipWindowRef.current.document.body
+      )}
     </div>
   )
 }
