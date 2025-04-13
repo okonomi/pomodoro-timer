@@ -21,14 +21,13 @@ Webベースのプロダクティビティツールとして、ポモドーロ�
 - PiPモードの切替ボタンを設置
 
 ### 技術仕様
-- React（Next.js推奨）を使用
+- Reactを使用
 - TypeScriptを採用
 - ビルドツールとしてViteを利用
 - パッケージマネージャはpnpmを使用
 - スタイリングにTailwind CSS (v4) を使用
 - Canvas APIを用いてタイマーの表示を描画
 - WebブラウザのPicture-in-Picture APIを利用してCanvasの表示をPiPで表示
-- YouTube IFrame Player APIを使用して背景動画を再生
 
 ### デザイン
 - シンプルで集中を妨げないダークモード基調
