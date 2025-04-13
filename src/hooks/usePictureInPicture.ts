@@ -8,7 +8,7 @@ interface UsePictureInPictureOptions {
 
 export function usePictureInPicture({
   width = 320,
-  height = 280,
+  height = 100, // 高さを100pxに変更
   onClose,
 }: UsePictureInPictureOptions = {}) {
   const [isPiPActive, setIsPiPActive] = useState(false);

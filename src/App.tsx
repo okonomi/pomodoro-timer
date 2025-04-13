@@ -27,7 +27,7 @@ function App() {
     togglePiP,
   } = usePictureInPicture({
     width: 320,
-    height: 280,
+    height: 100, // 高さを100pxに変更
   });
 
   return (
