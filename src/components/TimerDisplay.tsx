@@ -1,4 +1,3 @@
-import React from 'react';
 import { TimerType, TimerState } from '../types';
 
 interface TimerDisplayProps {
