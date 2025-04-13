@@ -59,23 +59,29 @@ export function usePictureInPicture({
         // Set the page title
         pipWindow.document.title = 'Pomodoro Timer';
         
-        // Load Tailwind CSS
-        const linkEl = pipWindow.document.createElement('link');
-        linkEl.rel = 'stylesheet';
-        linkEl.href = window.location.origin + '/src/index.css'; // Path to Tailwind CSS
-        pipWindow.document.head.appendChild(linkEl);
-        
-        // Set minimal styles
-        const style = pipWindow.document.createElement('style');
-        style.textContent = `
-          body {
-            margin: 0;
-            padding: 0;
-            height: 100vh;
-            overflow: hidden;
+        // Load all stylesheets from the main document to ensure Tailwind CSS works
+        const stylesheets = Array.from(document.styleSheets);
+        stylesheets.forEach(stylesheet => {
+          try {
+            // Only process stylesheets from the same origin (skip external stylesheets)
+            if (stylesheet.href && !stylesheet.href.startsWith('data:')) {
+              const linkEl = pipWindow.document.createElement('link');
+              linkEl.rel = 'stylesheet';
+              linkEl.href = stylesheet.href;
+              pipWindow.document.head.appendChild(linkEl);
+            } else if (stylesheet.cssRules && stylesheet.cssRules.length > 0) {
+              // For inline styles (like those injected by Vite in dev mode)
+              const style = pipWindow.document.createElement('style');
+              Array.from(stylesheet.cssRules).forEach(rule => {
+                style.appendChild(pipWindow.document.createTextNode(rule.cssText));
+              });
+              pipWindow.document.head.appendChild(style);
+            }
+          } catch (e) {
+            // CORS restrictions may prevent reading cssRules from some stylesheets
+            console.warn('Could not copy stylesheet to PiP window:', e);
           }
-        `;
-        pipWindow.document.head.appendChild(style);
+        });
         
         // Activate the PiP window
         setIsPiPActive(true);
