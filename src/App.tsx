@@ -35,89 +35,54 @@ function PiPWindow({ timeLeft, timerType, timerState, onToggleTimer, onSwitchTim
     return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
+  // Tailwind CSSのスタイルをPiPウィンドウのdocumentに追加
+  useEffect(() => {
+    // PiPウィンドウのdocument内のheadに必要なスタイルを注入
+    const pipDoc = window.document;
+    
+    // すでに同じIDのスタイル要素がある場合は作成しない
+    if (!pipDoc.getElementById('tailwind-styles')) {
+      const linkEl = pipDoc.createElement('link');
+      linkEl.id = 'tailwind-styles';
+      linkEl.rel = 'stylesheet';
+      linkEl.href = window.location.origin + '/src/index.css'; // Tailwind CSSへのパス
+      pipDoc.head.appendChild(linkEl);
+    }
+  }, []);
+
   return (
     <>
-      {/* PiPウィンドウのスタイルを設定 */}
+      {/* ベースとなるスタイルを設定 */}
       <style>
         {`
           body {
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: #1e293b;
-            color: #ffffff;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
             height: 100vh;
-          }
-          .timer-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 20px;
-          }
-          .time {
-            font-size: 60px;
-            font-weight: bold;
-            margin: 0;
-          }
-          .status {
-            font-size: 24px;
-            margin: 10px 0 20px;
-          }
-          .controls {
-            display: flex;
-            gap: 20px;
-            margin-top: 20px;
-          }
-          .button {
-            border: none;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            opacity: 0.8;
-            transition: opacity 0.2s;
-          }
-          .button:hover {
-            opacity: 1;
-          }
-          .button-play {
-            background-color: #3b82f6;
-          }
-          .button-switch {
-            background-color: #64748b;
-            font-size: 12px;
-            font-weight: bold;
+            overflow: hidden;
           }
         `}
       </style>
       
       {/* PiPウィンドウの内容 */}
-      <div className="timer-container">
-        <p className="time">{formatTime(timeLeft)}</p>
-        <p className="status">{timerType === 'work' ? '作業中' : '休憩中'}</p>
-        <div className="controls">
-          <button 
-            className="button button-play"
-            onClick={onToggleTimer}
-          >
-            {timerState === 'running' ? '⏸' : '▶'}
-          </button>
-          <button 
-            className="button button-switch"
-            onClick={onSwitchTimerType}
-          >
-            切替
-          </button>
+      <div className="flex flex-col items-center justify-center h-screen bg-slate-900 text-white">
+        <div className="flex flex-col items-center justify-center text-center p-5">
+          <p className="text-6xl font-bold m-0">{formatTime(timeLeft)}</p>
+          <p className="text-2xl my-2.5 mb-5">{timerType === 'work' ? '作業中' : '休憩中'}</p>
+          <div className="flex gap-5 mt-5">
+            <button 
+              className="flex items-center justify-center w-[50px] h-[50px] rounded-full bg-blue-500 bg-opacity-80 border-none cursor-pointer hover:bg-opacity-100 transition-opacity"
+              onClick={onToggleTimer}
+            >
+              {timerState === 'running' ? '⏸' : '▶'}
+            </button>
+            <button 
+              className="flex items-center justify-center w-[50px] h-[50px] rounded-full bg-slate-500 bg-opacity-80 border-none cursor-pointer hover:bg-opacity-100 transition-opacity text-xs font-bold"
+              onClick={onSwitchTimerType}
+            >
+              切替
+            </button>
+          </div>
         </div>
       </div>
     </>
@@ -212,10 +177,11 @@ function App() {
         // ページのタイトルを設定
         pipWindow.document.title = 'ポモドーロタイマー';
         
-        // デフォルトのマージンを削除
-        const bodyStyle = pipWindow.document.body.style;
-        bodyStyle.margin = '0';
-        bodyStyle.padding = '0';
+        // Tailwind CSSを読み込む
+        const linkEl = pipWindow.document.createElement('link');
+        linkEl.rel = 'stylesheet';
+        linkEl.href = window.location.origin + '/src/index.css'; // Tailwind CSSへのパス
+        pipWindow.document.head.appendChild(linkEl);
         
         // PiPウィンドウがアクティブに
         setIsPiPActive(true);
