@@ -15,8 +15,12 @@ export function PiPWindow({
     return `${minutes.toString().padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`
   }
 
+  // タイマータイプに応じた背景色の設定
+  const bgColor = timerType === "work" ? "bg-slate-900" : "bg-blue-300"
+  const textColor = timerType === "work" ? "text-white" : "text-slate-900"
+
   return (
-    <div className="flex h-screen w-full bg-slate-900 text-white">
+    <div className={`flex h-screen w-full ${bgColor} ${textColor}`}>
       {/* 左側2/3 - タイマー表示のみ */}
       <div className="flex flex-grow items-center justify-center">
         <p className="font-mono text-5xl font-bold">{formatTime(timeLeft)}</p>
@@ -33,14 +37,14 @@ export function PiPWindow({
         <div className="mt-1 flex flex-row gap-1">
           <button
             type="button"
-            className="bg-opacity-80 hover:bg-opacity-100 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full border-none bg-blue-500 transition-opacity"
+            className={`bg-opacity-80 hover:bg-opacity-100 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full border-none ${timerType === "work" ? "bg-blue-500" : "bg-slate-700"} transition-opacity`}
             onClick={onToggleTimer}
           >
             {timerState === "running" ? "⏸" : "▶"}
           </button>
           <button
             type="button"
-            className="bg-opacity-80 hover:bg-opacity-100 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full border-none bg-slate-500 text-[8px] font-bold transition-opacity"
+            className={`bg-opacity-80 hover:bg-opacity-100 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full border-none ${timerType === "work" ? "bg-slate-500" : "bg-slate-700"} text-[8px] font-bold transition-opacity`}
             onClick={onSwitchTimerType}
           >
             SW
