@@ -1,7 +1,7 @@
 import { Monitor, MonitorOff, Pause, Play, Repeat } from "lucide-react"
 import type { TimerState, TimerType } from "../types"
 
-interface TimerDisplayProps {
+type Props = {
   timeLeft: number
   timerType: TimerType
   timerState: TimerState
@@ -21,7 +21,7 @@ export function TimerDisplay({
   onTogglePiP,
   onSwitchTimerType,
   isPiPActive,
-}: TimerDisplayProps) {
+}: Props) {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-slate-900 p-4 text-white">
       <h1 className="mb-8 text-3xl font-bold">Pomodoro Timer</h1>

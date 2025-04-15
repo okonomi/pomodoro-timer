@@ -3,7 +3,7 @@ import { Pause, Play, Repeat } from "lucide-react"
 // PiPWindowProps型をこのファイル内に移動
 import type { TimerState, TimerType } from "../types"
 
-export interface PiPWindowProps {
+type Props = {
   timeLeft: number
   timerType: TimerType
   timerState: TimerState
@@ -18,7 +18,7 @@ export function PiPWindow({
   timerState,
   onToggleTimer,
   onSwitchTimerType,
-}: PiPWindowProps) {
+}: Props) {
   // 時間のフォーマット
   const formatTime = (seconds: number): string => {
     const minutes = Math.floor(seconds / 60)
