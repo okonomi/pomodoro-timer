@@ -1,3 +1,4 @@
+import { Monitor, MonitorOff, Pause, Play, Repeat } from "lucide-react"
 import type { TimerState, TimerType } from "../types"
 
 interface TimerDisplayProps {
@@ -38,24 +39,27 @@ export function TimerDisplay({
         <button
           type="button"
           onClick={onToggleTimer}
-          className="rounded-full bg-blue-600 px-6 py-3 font-medium text-white transition hover:bg-blue-700"
+          className="rounded-full bg-blue-600 px-6 py-3 font-medium text-white transition hover:bg-blue-700 flex items-center gap-2"
         >
+          {timerState === "running" ? <Pause size={20} /> : <Play size={20} />}
           {timerState === "running" ? "Pause" : "Start"}
         </button>
 
         <button
           type="button"
           onClick={onTogglePiP}
-          className="rounded-full bg-slate-700 px-6 py-3 font-medium text-white transition hover:bg-slate-600"
+          className="rounded-full bg-slate-700 px-6 py-3 font-medium text-white transition hover:bg-slate-600 flex items-center gap-2"
         >
+          {isPiPActive ? <MonitorOff size={20} /> : <Monitor size={20} />}
           {isPiPActive ? "Close PiP" : "Open PiP"}
         </button>
 
         <button
           type="button"
           onClick={onSwitchTimerType}
-          className="rounded-full bg-slate-700 px-6 py-3 font-medium text-white transition hover:bg-slate-600"
+          className="rounded-full bg-slate-700 px-6 py-3 font-medium text-white transition hover:bg-slate-600 flex items-center gap-2"
         >
+          <Repeat size={20} />
           {timerType === "work" ? "Switch to Break" : "Switch to Work"}
         </button>
       </div>

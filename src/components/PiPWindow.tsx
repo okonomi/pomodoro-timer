@@ -1,4 +1,5 @@
 import clsx from "clsx"
+import { Pause, Play, Repeat } from "lucide-react"
 import type { PiPWindowProps } from "../types"
 
 // PiPウィンドウコンポーネント
@@ -48,7 +49,11 @@ export function PiPWindow({
             )}
             onClick={onToggleTimer}
           >
-            {timerState === "running" ? "⏸" : "▶"}
+            {timerState === "running" ? (
+              <Pause size={16} />
+            ) : (
+              <Play size={16} />
+            )}
           </button>
           <button
             type="button"
@@ -58,7 +63,7 @@ export function PiPWindow({
             )}
             onClick={onSwitchTimerType}
           >
-            SW
+            <Repeat size={14} />
           </button>
         </div>
       </div>
