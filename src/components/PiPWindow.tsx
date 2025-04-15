@@ -1,6 +1,15 @@
 import clsx from "clsx"
 import { Pause, Play, Repeat } from "lucide-react"
-import type { PiPWindowProps } from "../types"
+// PiPWindowProps型をこのファイル内に移動
+import type { TimerState, TimerType } from "../types"
+
+export interface PiPWindowProps {
+  timeLeft: number
+  timerType: TimerType
+  timerState: TimerState
+  onToggleTimer: () => void
+  onSwitchTimerType: () => void
+}
 
 // PiPウィンドウコンポーネント
 export function PiPWindow({
