@@ -1,9 +1,9 @@
 import { createPortal } from "react-dom"
 
-import { PiPWindow } from "./components/PiPWindow"
-import { TimerDisplay } from "./components/TimerDisplay"
-import { usePictureInPicture } from "./hooks/usePictureInPicture"
-import { useTimer } from "./hooks/useTimer"
+import { PiPWindow } from "~/components/PiPWindow"
+import { TimerDisplay } from "~/components/TimerDisplay"
+import { usePictureInPicture } from "~/hooks/usePictureInPicture"
+import { useTimer } from "~/hooks/useTimer"
 
 export const App: React.FC = () => {
   // タイマーのカスタムフック

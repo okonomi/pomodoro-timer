@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react"
-import type { TimerState, TimerType } from "../types"
+import type { TimerState, TimerType } from "~/types"
 
 interface UseTimerProps {
   initialTimerType?: TimerType

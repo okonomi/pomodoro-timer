@@ -1,6 +1,6 @@
 import clsx from "clsx"
 import { Pause, Play, Repeat } from "lucide-react"
-import type { TimerState, TimerType } from "../types"
+import type { TimerState, TimerType } from "~/types"
 
 type Props = {
   timeLeft: number
