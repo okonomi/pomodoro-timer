@@ -12,7 +12,7 @@ type Props = {
   isPiPActive: boolean
 }
 
-export function TimerDisplay({
+export const TimerDisplay: React.FC<Props> = ({
   timeLeft,
   timerType,
   timerState,
@@ -21,7 +21,7 @@ export function TimerDisplay({
   onTogglePiP,
   onSwitchTimerType,
   isPiPActive,
-}: Props) {
+}) => {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-slate-900 p-4 text-white">
       <h1 className="mb-8 text-3xl font-bold">Pomodoro Timer</h1>

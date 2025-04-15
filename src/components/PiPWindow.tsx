@@ -1,6 +1,5 @@
 import clsx from "clsx"
 import { Pause, Play, Repeat } from "lucide-react"
-// PiPWindowProps型をこのファイル内に移動
 import type { TimerState, TimerType } from "../types"
 
 type Props = {
@@ -11,14 +10,13 @@ type Props = {
   onSwitchTimerType: () => void
 }
 
-// PiPウィンドウコンポーネント
-export function PiPWindow({
+export const PiPWindow: React.FC<Props> = ({
   timeLeft,
   timerType,
   timerState,
   onToggleTimer,
   onSwitchTimerType,
-}: Props) {
+}) => {
   // 時間のフォーマット
   const formatTime = (seconds: number): string => {
     const minutes = Math.floor(seconds / 60)

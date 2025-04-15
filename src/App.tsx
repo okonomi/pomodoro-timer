@@ -5,7 +5,7 @@ import { TimerDisplay } from "./components/TimerDisplay"
 import { usePictureInPicture } from "./hooks/usePictureInPicture"
 import { useTimer } from "./hooks/useTimer"
 
-function App() {
+const App: React.FC = () => {
   // タイマーのカスタムフック
   const {
     timerType,
